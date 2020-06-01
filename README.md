@@ -1,4 +1,7 @@
 # Type-DB
+![CI](https://github.com/moritanian/type-db/workflows/CI/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/moritanian/type-db/branch/master/graph/badge.svg)](https://codecov.io/gh/moritanian/type-db)
 
 ## Pure typescript Database
 - Type system base
