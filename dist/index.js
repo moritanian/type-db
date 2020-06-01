@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Repository = exports.TypeDB = void 0;
 const fs = require("fs");
 ;
 class TypeDB {
@@ -28,46 +29,57 @@ class TypeDB {
             yield fs.promises.writeFile(this.storePath, d);
         });
     }
-    getModel(modelDescribe) {
-        return new Model(this.modelDict[modelDescribe.name], modelDescribe);
+    getRepository(modelDescribe) {
+        if (!this.modelDict[modelDescribe.name]) {
+            this.modelDict[modelDescribe.name] = {};
+        }
+        return new Repository(modelDescribe, this.modelDict[modelDescribe.name], this);
     }
 }
-exports.default = TypeDB;
-class Model {
-    constructor(records, describe) {
+exports.TypeDB = TypeDB;
+class Repository {
+    constructor(describe, records, db) {
+        this.records = records;
+        this.db = db;
         this.priCounter = 0;
-        this.recordsDict = {};
+        this.mapping = {}; // #TODO
         this.describe = describe;
-        this.recordsDict[this.describe.primaryKey] = {};
-        records.forEach(record => {
-            let primaryValue = record[this.describe.primaryKey];
-            this.recordsDict[this.describe.primaryKey][primaryValue] = record;
-        });
         if (describe.autoIncrement) {
-            this.priCounter = Math.max.apply(records.map(record => record[this.describe.primaryKey]));
+            for (let key in this.records) {
+                if (this.priCounter < this.records[key][this.describe.primaryKey]) {
+                    this.priCounter = this.records[key][this.describe.primaryKey];
+                }
+            }
         }
+    }
+    save() {
+        return this.db.save();
     }
     new(obj = {}) {
         const newRecord = Object.assign({}, this.describe.columns, obj);
         if (this.describe.autoIncrement) {
             newRecord[this.primaryKey] = (++this.priCounter);
         }
+        if (newRecord[this.describe.primaryKey] in this.records) {
+            throw new Error('Primary key error');
+        }
+        this.records[newRecord[this.describe.primaryKey]] = newRecord;
         return newRecord;
     }
     all() {
-        return Object.keys(this.recordsDict[this.describe.primaryKey])
-            .map(key => this.recordsDict[this.describe.primaryKey][key]);
+        return Object.keys(this.records)
+            .map(key => this.records[key]);
     }
     delete(primaryValue) {
         const record = this.find(primaryValue);
         if (!record) {
             return false;
         }
-        delete this.recordsDict[this.describe.primaryKey][primaryValue];
+        delete this.records[primaryValue];
         return true;
     }
     find(primaryValue) {
-        return this.recordsDict[this.describe.primaryKey][primaryValue];
+        return this.records[primaryValue] || null;
     }
     findBy(key, value) {
         const condition = {}; //{[key]: value};
@@ -85,10 +97,12 @@ class Model {
         condition = Object.assign({}, condition);
         if (this.describe.primaryKey in condition) {
             const primaryKey = this.describe.primaryKey; // # TODO
-            return [this.find(condition[primaryKey])];
+            const record = this.find(condition[primaryKey]);
+            return record ? [record] : [];
         }
         return this.all()
             .filter(record => Object.keys(condition).every(key => record[key] === condition[key]));
     }
 }
+exports.Repository = Repository;
 //# sourceMappingURL=index.js.map

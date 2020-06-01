@@ -1,13 +1,13 @@
 # Type-DB
 
-## Feature
+## Pure typescript Database
 - Type system base
 - Pure typescript library (no native code)
 - Store its data as JSON file or in memory
 
 ## Usage
 ```javascript
-import TypeDB from 'typedb';
+import {TypeDB} from 'type-db';
 
 
 const UserDescribe = {
@@ -25,10 +25,10 @@ const UserDescribe = {
 
 const db = new TypeDB('path/to/db.json');
 await db.load();
-const userModel = db.getModel(UserDescribe);
+const userRepository = db.getRepository(UserDescribe);
 
 // Create
-const user1 = userModel.new({firstName: 'Komari', lastName: 'Koshigaya', sex: 'female', age: 13});
+const user1 = userRepository.new({firstName: 'Komari', lastName: 'Koshigaya', sex: 'female', age: 13});
 await db.save();
 
 // Update
@@ -36,13 +36,13 @@ user1.age = 14
 await db.save();
 
 // delete
-userModel.delete(user1);
+userRepository.delete(user1);
 await db.save();
 
 // search
-UserModel.find(1);
-const femaleUser = UserModel.findBy('sex': 'female');
-const thirtyYearsMales = UserModel.where({sex: 'male', age: 30});
+userRepository.find(1);
+const femaleUser = userRepository.findBy('sex': 'female');
+const thirtyYearsMales = userRepository.where({sex: 'male', age: 30});
 
 
 
