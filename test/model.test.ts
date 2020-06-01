@@ -117,6 +117,11 @@ describe('#where()', () => {
     chai.assert.strictEqual(users.length, 2);
   });
 
+  it('find one record with multiple conditions', () => {
+    const users = userRepo.where({id: 1, sex: 'female'});
+    chai.assert.strictEqual(users.length, 1);
+  });
+
   it('find no record with single condition', () => {
     const users = userRepo.where({lastName: 'dummy'});
     chai.assert.strictEqual(users.length, 0);

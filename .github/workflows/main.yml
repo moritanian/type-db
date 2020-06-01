@@ -36,6 +36,8 @@ jobs:
       run: yarn install --frozen-lockfile
     - name: Run test
       run: yarn run test
+    - name: Report coverage
+      run : yarn run report-coverage
     - name: upload coverage
       uses: codecov/codecov-action@v1
       with:

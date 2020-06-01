@@ -7,7 +7,8 @@
     "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",
-    "test": "nyc mocha -r ts-node/register \"test/*.ts\""
+    "test": "nyc mocha -r ts-node/register \"test/*.ts\"",
+    "report-coverage":  "nyc report --reporter=text-lcov > coverage.lcov"
   },
   "author": "moritanian",
   "license": "MIT",

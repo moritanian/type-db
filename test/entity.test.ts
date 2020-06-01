@@ -9,7 +9,9 @@ const JSONDir = __dirname + '/json-file/';
 
 async function cleanJSONFiles() {
   const files = await fs.promises.readdir(JSONDir);
-  await Promise.all(files.map(file => fs.promises.unlink(JSONDir + file)));
+  await Promise.all(
+    files.filter(file => file !== '.gitkeep')
+        .map(file => fs.promises.unlink(JSONDir + file)));
 }
 
 beforeEach(cleanJSONFiles);
