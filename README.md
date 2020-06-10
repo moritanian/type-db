@@ -28,6 +28,12 @@ const UserDescribe = {
 
 const db = new TypeDB('path/to/db.json');
 await db.load();
+/*
+ * Or in memory db:
+ *
+ * const db = new TypeDB();
+ */
+
 const userRepository = db.getRepository(UserDescribe);
 
 // Create

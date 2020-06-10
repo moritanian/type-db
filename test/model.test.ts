@@ -6,7 +6,7 @@ import {UserDescribe, UserDescribeNoIncrement, setUsers} from './test-data/user'
 
 describe('#new()', () => {
   it('all default value', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribe);
     const user1 = userRepo.new();
     chai.assert.strictEqual(user1.firstName, '');
@@ -16,7 +16,7 @@ describe('#new()', () => {
   });
 
   it('with some options', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribe);
     const user1 = userRepo.new({firstName: 'Komari', lastName: 'Koshigaya', sex: 'female', age: 13});
     chai.assert.strictEqual(user1.firstName, 'Komari');
@@ -26,7 +26,7 @@ describe('#new()', () => {
   });
 
   it('auto increment', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribe);
     const user1 = userRepo.new({firstName: 'Komari', lastName: 'Koshigaya', sex: 'female', age: 13});
     const user2 = userRepo.new({firstName: 'Komari', lastName: 'Koshigaya', sex: 'female', age: 13});
@@ -35,7 +35,7 @@ describe('#new()', () => {
   });
 
   it('failed without auto increment', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribeNoIncrement);
     userRepo.new();
     chai.assert.throw(() => userRepo.new());
@@ -44,7 +44,7 @@ describe('#new()', () => {
 
 describe('#delete()', () => {
   it('successfully delete', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribe);
     setUsers(userRepo);
     const user = userRepo.find(1);
@@ -58,7 +58,7 @@ describe('#delete()', () => {
   });
 
   it('nothing shoud happen when try to delete not existing record', () => {
-    const db = new TypeDB('./test-data/');
+    const db = new TypeDB();
     const userRepo = db.getRepository(UserDescribe);
     setUsers(userRepo);
     const result = userRepo.delete(-1);
@@ -67,7 +67,7 @@ describe('#delete()', () => {
 });
 
 describe('find', () => {
-  const db = new TypeDB('./test-data/');
+  const db = new TypeDB();
   const userRepo = db.getRepository(UserDescribe);
   setUsers(userRepo);
   const user1 = userRepo.find(1);
@@ -75,7 +75,7 @@ describe('find', () => {
 });
 
 describe('findBy', () => {
-  const db = new TypeDB('./test-data/');
+  const db = new TypeDB();
   const userRepo = db.getRepository(UserDescribe);
   setUsers(userRepo);
 
@@ -92,7 +92,7 @@ describe('findBy', () => {
 });
 
 describe('#where()', () => {
-  const db = new TypeDB('./test-data/');
+  const db = new TypeDB();
   const userRepo = db.getRepository(UserDescribe);
   setUsers(userRepo);
 

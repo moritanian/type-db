@@ -10,15 +10,21 @@ interface IModelDescribe {
 
 export class TypeDB {
   private modelDict: {[modelName: string]: any} = {};
-  constructor(private storePath: string) {
+  constructor(private storePath?: string) {
   }
 
   public async load() {
+    if(!this.storePath) {
+      return;
+    }
     const d = await fs.promises.readFile(this.storePath, 'utf-8');
     this.modelDict = JSON.parse(d);
   }
 
   public async save() {
+    if(!this.storePath) {
+      return;
+    }
     const d = JSON.stringify(this.modelDict);
     await fs.promises.writeFile(this.storePath, d);
   }
