@@ -19,12 +19,18 @@ class TypeDB {
     }
     load() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.storePath) {
+                return;
+            }
             const d = yield fs.promises.readFile(this.storePath, 'utf-8');
             this.modelDict = JSON.parse(d);
         });
     }
     save() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.storePath) {
+                return;
+            }
             const d = JSON.stringify(this.modelDict);
             yield fs.promises.writeFile(this.storePath, d);
         });
