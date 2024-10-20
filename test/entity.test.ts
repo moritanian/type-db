@@ -26,12 +26,7 @@ describe('#save()', () => {
     const userRepo = db.getRepository(UserDescribe);
     userRepo.new();
     await userRepo.save();
-    let fd = null;
-    try {
-      fd = await fs.promises.open(jsonPath, 'r');
-    } catch (e) {
-    }
-    chai.assert.isNotNull(fd);
+    chai.assert.isTrue(fs.existsSync(jsonPath));
   });
 });
 
