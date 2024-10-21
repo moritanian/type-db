@@ -10,23 +10,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Repository = exports.TypeDB = void 0;
+const processQueue_1 = require("./processQueue");
 const fs = require("fs");
 ;
 class TypeDB {
     constructor(storePath) {
         this.storePath = storePath;
         this.modelDict = {};
+        this.writeQueue = new processQueue_1.ProcessQueue();
     }
     load() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.storePath) {
+                return;
+            }
             const d = yield fs.promises.readFile(this.storePath, 'utf-8');
             this.modelDict = JSON.parse(d);
         });
     }
     save() {
         return __awaiter(this, void 0, void 0, function* () {
+            const storePath = this.storePath;
+            if (!storePath) {
+                return;
+            }
             const d = JSON.stringify(this.modelDict);
-            yield fs.promises.writeFile(this.storePath, d);
+            //await fs.promises.writeFile(storePath, d);
+            yield this.writeQueue.push(() => fs.promises.writeFile(storePath, d));
         });
     }
     getRepository(modelDescribe) {

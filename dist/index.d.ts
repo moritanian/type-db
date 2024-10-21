@@ -6,9 +6,10 @@ interface IModelDescribe {
     autoIncrement: boolean;
 }
 export declare class TypeDB {
-    private storePath;
+    private storePath?;
     private modelDict;
-    constructor(storePath: string);
+    private writeQueue;
+    constructor(storePath?: string | undefined);
     load(): Promise<void>;
     save(): Promise<void>;
     getRepository<Describe extends IModelDescribe>(modelDescribe: Describe): Repository<Describe>;
