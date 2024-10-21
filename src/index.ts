@@ -1,3 +1,4 @@
+import { ProcessQueue } from './processQueue'
 import * as fs from 'fs';
 type PrimaryType = string | number;
 
@@ -9,12 +10,13 @@ interface IModelDescribe {
 };
 
 export class TypeDB {
-  private modelDict: {[modelName: string]: any} = {};
+  private modelDict: { [modelName: string]: any } = {};
+  private writeQueue: ProcessQueue = new ProcessQueue();
   constructor(private storePath?: string) {
   }
 
   public async load() {
-    if(!this.storePath) {
+    if (!this.storePath) {
       return;
     }
     const d = await fs.promises.readFile(this.storePath, 'utf-8');
@@ -22,15 +24,17 @@ export class TypeDB {
   }
 
   public async save() {
-    if(!this.storePath) {
+    const storePath = this.storePath;
+    if (!storePath) {
       return;
     }
     const d = JSON.stringify(this.modelDict);
-    await fs.promises.writeFile(this.storePath, d);
+    //await fs.promises.writeFile(storePath, d);
+    await this.writeQueue.push(() => fs.promises.writeFile(storePath, d));
   }
 
-  public getRepository<Describe extends IModelDescribe>(modelDescribe: Describe): Repository<Describe>{
-    if(!this.modelDict[modelDescribe.name]) {
+  public getRepository<Describe extends IModelDescribe>(modelDescribe: Describe): Repository<Describe> {
+    if (!this.modelDict[modelDescribe.name]) {
       this.modelDict[modelDescribe.name] = {};
     }
     return new Repository<Describe>(modelDescribe, this.modelDict[modelDescribe.name], this);
@@ -43,10 +47,10 @@ export class Repository<Describe extends IModelDescribe> {
   private mapping = {}; // #TODO
   constructor(describe: Describe, private records: Record<any, Describe['columns']>, private db: TypeDB) {
     this.describe = describe;
-   
-    if(describe.autoIncrement) {
-      for(let key in this.records) {
-        if(this.priCounter < (this.records[key][this.describe.primaryKey] as number)) {
+
+    if (describe.autoIncrement) {
+      for (let key in this.records) {
+        if (this.priCounter < (this.records[key][this.describe.primaryKey] as number)) {
           this.priCounter = this.records[key][this.describe.primaryKey] as number;
         }
       }
@@ -59,10 +63,10 @@ export class Repository<Describe extends IModelDescribe> {
 
   new(obj: Partial<Describe['columns']> = {}): Describe['columns'] {
     const newRecord: Describe['columns'] = Object.assign({}, this.describe.columns, obj);
-    if(this.describe.autoIncrement) {
+    if (this.describe.autoIncrement) {
       newRecord[this.primaryKey] = (++this.priCounter) as any;
     }
-    if(newRecord[this.describe.primaryKey] as string | number in this.records) {
+    if (newRecord[this.describe.primaryKey] as string | number in this.records) {
       throw new Error('Primary key error');
     }
     this.records[newRecord[this.describe.primaryKey] as string | number] = newRecord;
@@ -77,7 +81,7 @@ export class Repository<Describe extends IModelDescribe> {
 
   delete(primaryValue: PrimaryType): boolean {
     const record = this.find(primaryValue);
-    if(!record) {
+    if (!record) {
       return false;
     }
     delete this.records[primaryValue];
@@ -93,7 +97,7 @@ export class Repository<Describe extends IModelDescribe> {
     const condition: Partial<Describe['columns']> = {}; //{[key]: value};
     condition[key] = value;
     const list = this.where(condition);
-    if(list.length === 0) {
+    if (list.length === 0) {
       return null;
     }
     return list[0];
@@ -107,12 +111,12 @@ export class Repository<Describe extends IModelDescribe> {
     condition: Partial<Describe['columns']>
   ): Describe['columns'][] {
     condition = Object.assign({}, condition);
-    if(this.describe.primaryKey in condition) {
-      const primaryKey = this.describe.primaryKey as keyof(typeof condition); // # TODO
+    if (this.describe.primaryKey in condition) {
+      const primaryKey = this.describe.primaryKey as keyof (typeof condition); // # TODO
       const record = this.find(condition[primaryKey] as PrimaryType);
       return record ? [record] : [];
     }
-    return  this.all()
+    return this.all()
       .filter(record => Object.keys(condition).every(key => record[key] === condition[key]));
   }
 }
